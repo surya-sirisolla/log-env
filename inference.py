@@ -13,10 +13,12 @@ from openai import OpenAI
 # ---------------------------------------------------------------------------
 # Configuration from environment variables
 # ---------------------------------------------------------------------------
-IMAGE_NAME = os.getenv("IMAGE_NAME")
 API_BASE_URL = os.getenv("API_BASE_URL", "https://router.huggingface.co/v1")
 MODEL_NAME = os.getenv("MODEL_NAME", "Qwen/Qwen2.5-72B-Instruct")
-API_KEY = os.getenv("HF_TOKEN") or os.getenv("API_KEY", "")
+HF_TOKEN = os.getenv("HF_TOKEN")
+
+# Optional — if you use from_docker_image():
+LOCAL_IMAGE_NAME = os.getenv("LOCAL_IMAGE_NAME")
 
 TASKS = ["log_classification", "incident_detection", "full_triage"]
 BENCHMARK_NAME = "logsentinel"
@@ -225,15 +227,15 @@ def run_task(env: LogSentinelClient, llm: OpenAI, task_name: str) -> List[float]
 
 def main():
     # Create environment client
-    if IMAGE_NAME:
-        env = LogSentinelClient.from_docker_image(IMAGE_NAME)
+    if LOCAL_IMAGE_NAME:
+        env = LogSentinelClient.from_docker_image(LOCAL_IMAGE_NAME)
     else:
         # Default: connect to locally running server
         env_url = os.getenv("ENV_URL", "http://localhost:7860")
         env = LogSentinelClient(env_url)
 
     # Create LLM client
-    llm = OpenAI(base_url=API_BASE_URL, api_key=API_KEY)
+    llm = OpenAI(base_url=API_BASE_URL, api_key=HF_TOKEN)
 
     try:
         all_rewards = {}
