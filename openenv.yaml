@@ -1,0 +1,33 @@
+name: logsentinel
+version: "1.0.0"
+description: "Log analysis and incident classification environment for training AI agents on SRE/DevOps tasks"
+author: "srk"
+tags:
+  - openenv
+  - log-analysis
+  - incident-response
+  - sre
+  - devops
+
+env:
+  module: environment
+  class: LogSentinelEnv
+
+tasks:
+  - name: log_classification
+    description: "Classify 10 log entries by severity and type from a single source"
+    difficulty: easy
+  - name: incident_detection
+    description: "Detect and correlate incidents across 3 log sources with 20 entries"
+    difficulty: medium
+  - name: full_triage
+    description: "Full incident triage: classify, detect, correlate, and report across 5 sources with 30+ entries"
+    difficulty: hard
+
+action_space:
+  type: object
+  description: "Structured action with type, target logs, classifications, and reports"
+
+observation_space:
+  type: object
+  description: "Batch of log entries with task context and feedback"
