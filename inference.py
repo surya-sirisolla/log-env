@@ -273,7 +273,7 @@ def run_task(env: LogSentinelClient, llm: Any, task_name: str) -> List[float]:
     except Exception as e:
         err = str(e).replace("\n", " ")[:200]
         print(f"[STEP] step=1 action=reset_failed reward=0.00 done=true error={err}", flush=True)
-        print(f"[END] success=false steps=1 score=0.000 rewards=0.00", flush=True)
+        print(f"[END] success=false steps=1 score=0.001 rewards=0.00", flush=True)
         return [0.0]
 
     messages = [{"role": "system", "content": SYSTEM_PROMPT}]
@@ -328,7 +328,9 @@ def run_task(env: LogSentinelClient, llm: Any, task_name: str) -> List[float]:
             break
 
     success = sum(rewards) > 0
-    score = sum(rewards) / max(len(rewards), 1)
+    raw_score = sum(rewards) / max(len(rewards), 1)
+    # Validator requires score strictly in (0, 1) — clamp away from endpoints
+    score = min(0.999, max(0.001, raw_score))
     reward_strs = ",".join(f"{r:.2f}" for r in rewards) if rewards else "0.00"
     print(
         f"[END] success={str(success).lower()} steps={step_num} score={score:.3f} rewards={reward_strs}",
@@ -372,7 +374,7 @@ def main() -> int:
             for task in TASKS:
                 print(f"[START] task={task} env={BENCHMARK_NAME} model={MODEL_NAME}", flush=True)
                 print(f"[STEP] step=1 action=env_unavailable reward=0.00 done=true error=env_client_init_failed", flush=True)
-                print(f"[END] success=false steps=1 score=0.000 rewards=0.00", flush=True)
+                print(f"[END] success=false steps=1 score=0.001 rewards=0.00", flush=True)
                 print(flush=True)
             return 0
 
@@ -386,7 +388,7 @@ def main() -> int:
                 # Belt-and-suspenders: run_task should never raise, but just in case
                 err = str(e).replace("\n", " ")[:200]
                 print(f"[STEP] step=1 action=task_crashed reward=0.00 done=true error={err}", flush=True)
-                print(f"[END] success=false steps=1 score=0.000 rewards=0.00", flush=True)
+                print(f"[END] success=false steps=1 score=0.001 rewards=0.00", flush=True)
                 rewards = [0.0]
             all_rewards[task] = rewards
             print(flush=True)
